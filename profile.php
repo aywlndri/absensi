@@ -5,6 +5,7 @@ $id = $_SESSION['id_u'];
 $koneksi = mysqli_connect("localhost","root","","absensi");
 $data = mysqli_fetch_array(mysqli_query($koneksi, "SELECT * FROM user WHERE id_user='$id'"));
 $nama_u = $data['namalengkap'];
+$pesan ="";
 if( !isset($_SESSION['id_u']) ) //jika session nama tidak ada
 {
  header('location:./../'.$_SESSION['akses']); //alihkan halaman
@@ -12,6 +13,56 @@ if( !isset($_SESSION['id_u']) ) //jika session nama tidak ada
 }else{ //jika ada session
  $id = $_SESSION['id_u']; //menyimpan session nama ke variabel $nama
 }
+
+
+if(isset($_POST['upload'])){
+
+$nik = $_POST['nik'];
+$namal = $_POST['namal'];
+$ttl = $_POST['ttl'];
+$jk = $_POST['jk'];
+$alamat = $_POST['alamat'];
+$tlp = $_POST['tlp'];
+$dept = $_POST['dept'];
+$jab = $_POST['jab'];
+
+//foto
+$ekstensi_diperbolehkan	= array('jpg','jpeg','png');
+	$nama_file   = $_FILES['foto']['name'];
+	$x = explode('.', $nama_file);
+	$ekstensi = strtolower(end($x));
+	$ukuran	= $_FILES['foto']['size'];
+	$lokasi_file = $_FILES['foto']['tmp_name'];
+	
+// Tentukan folder untuk menyimpan file
+$folder = "img/$nama_file";
+
+	if ($nama_file == ''){
+		$query = "update user set nimk ='$nik', namalengkap ='$namal', ttl ='$ttl', jeniskelamin ='$jk', alamat ='$alamat', notlp ='$tlp', departement ='$dept', jabatan= '$jab' where id_user=$id";
+		mysqli_query($koneksi, $query);
+		header('location: profile.php');
+	}
+	else {
+		if(in_array($ekstensi, $ekstensi_diperbolehkan) === true){
+			if($ukuran < 1000000){		
+				$query = "update user set nimk ='$nik', namalengkap ='$namal', ttl ='$ttl', jeniskelamin ='$jk', alamat ='$alamat', notlp ='$tlp', departement ='$dept', jabatan='$jab', foto='$nama_file' where id_user=$id";
+				mysqli_query($koneksi, $query);
+				move_uploaded_file($lokasi_file,"$folder");
+				header('location: profile.php');
+			}
+			else if($ukuran > 1000000){
+				$pesan = 'besar';
+				header('location: profile.php');
+			}
+		}
+		else{
+		$pesan = 'eks';
+		header('location: profile.php');
+		}
+	}
+	
+}
+
 ?>
 <!DOCTYPE HTML>
 <html>
@@ -209,23 +260,120 @@ SmartPhone Compatible web template, free WebDesigns for Nokia, Samsung, LG, Sony
 		<!-- main content start-->
 		<div id="page-wrapper">
 			<div class="main-page">
-				<h3 class="title1">Kalender</h3>
-				<div class="calendar-widget">
-					<header class="widget-header">
-                        <h4 class="widget-title">Absen dan Log Kegiatan</h4>
-						<br>
-						<font size="2" color ="blue" ><p>Klik pada tanggal untuk pengkonfirmasian.</p></font>
-                    </header>
-					<hr class="widget-separator">
-				<!-- grids -->
-					<div class="agile-calendar-grid">
-						<div class="page">
-							<div class="w3l-calendar-left">
-								<div class="calendar-heading">
-								</div>
-								<div class="monthly" id="mycalendar"></div>
+				<div class="forms">
+					<h2 class="title1">Profile</h2>
+					<div class=" form-grids row form-grids-right">
+						<div class="widget-shadow " data-example-id="basic-forms"> 
+							<div class="form-title">
+								<h4></h4>
 							</div>
-							<div class="clearfix"> </div>
+							<div class="form-body">
+								<form class="form-horizontal"> 
+									<div class="form-group"> 
+									<label for="inputEmail3" class="col-sm-3 control-label">Username</label> 
+										<div class="col-sm-5">
+										<input type="email" class="form-control" id="inputEmail3" placeholder="<?php echo $data['username']; ?>" disabled> 
+										</div> 
+									</div> 
+									<div class="form-group"> 
+									<label for="inputPassword3" class="col-sm-3 control-label">Password</label> 
+										<div class="col-sm-5"> 
+										<input type="password" class="form-control" id="inputPassword3" placeholder="*****" disabled> 
+										</div> 
+									</div> 
+										<div class="col-sm-offset-5">
+											<a href="gantiPassword.php"<button type="" class="btn btn-warning btn-flat btn-pri btn-md"><i class="fa fa-edit" aria-hidden="true"></i> Ganti Password</button></a>
+										</div>
+										<br>
+								</form>
+							</div>
+						</div>
+					</div>
+					<br>
+					<div class=" form-grids row form-grids-right">
+						<div class="widget-shadow " data-example-id="basic-forms"> 
+							<div class="form-title">
+								<h4></h4>
+							</div>
+							<div class="form-body">
+								<form action="" method="post" enctype="multipart/form-data" class="form-horizontal">  
+									<br>
+									<div class="form-group"> 
+									<label for="inputEmail3" class="col-sm-3 control-label">NIK</label> 
+										<div class="col-sm-5">
+										<input type="text" name="nik" class="form-control" id="inputEmail3" value="<?php echo $data['nimk'] ?>" placeholder="NIK">  
+										</div>										
+									</div>
+									<div class="form-group"> 
+									<label for="inputEmail3" class="col-sm-3 control-label">Nama Lengkap</label> 
+										<div class="col-sm-5">
+										<input type="text" name="namal" class="form-control" id="inputEmail3" value="<?php echo $data['namalengkap'] ?>" placeholder="Nama Lengkap"> 
+										</div>										
+									</div>
+									<div class="form-group"> 
+									<label for="inputEmail3" class="col-sm-3 control-label">Tempat, Tanggal Lahir</label> 
+										<div class="col-sm-5">
+										<input type="text" name="ttl" class="form-control" id="inputEmail3" value="<?php echo $data['ttl'] ?>" placeholder="Tempat, Tanggal Lahir" > 
+										</div>										
+									</div>
+									<div class="form-group">
+										<label for="focusedinput" class="col-sm-3 control-label">Jenis Kelamin</label>
+									<div class="col-sm-2">
+									<select name="jk" class="form-control1">
+										<option><?php echo $data['jeniskelamin']; ?></option>
+										<option>Laki-Laki</option>
+										<option>Perempuan</option>
+									</select>
+									</div>
+									</div>
+									<div class="form-group">
+										<label for="focusedinput" class="col-sm-3 control-label">Alamat</label>
+									<div class="col-sm-5">
+										<textarea name="alamat" cols="40" rows="4" class="form-control2" ><?php echo $data['alamat']; ?></textarea>
+									</div>
+									</div>
+									<div class="form-group"> 
+									<label for="inputEmail3" class="col-sm-3 control-label">No. Telp</label> 
+										<div class="col-sm-5">
+										<input type="text" name="tlp" class="form-control" id="inputEmail3" value="<?php echo $data['notlp'] ?>" placeholder="No. Telp" > 
+										</div>										
+									</div>
+									<div class="form-group"> 
+									<label for="inputEmail3" class="col-sm-3 control-label">Jabatan</label> 
+										<div class="col-sm-5">
+										<input type="text" name="jab" class="form-control" id="inputEmail3" value="<?php echo $data['jabatan'] ?>" placeholder="Jabatan" > 
+										</div>										
+									</div>
+									<div class="form-group"> 
+									<label for="inputEmail3" class="col-sm-3 control-label">Departemen</label> 
+										<div class="col-sm-5">
+										<select name="dept" id="selector1" class="form-control1">
+											<option><?php echo $data['departement']; ?></option>
+											<option> Programing</option>
+											<option> Jaringan</option>
+											<option> Statistika</option>
+										</select>
+										</div>										
+									</div>
+									<div class="form-group"> 
+									<label for="exampleInputFile" class="col-sm-3 control-label">Foto</label> 
+										<div class="col-sm-5">
+										<input type="file" name="foto" id="exampleInputFile" accept="image/*" > 
+										</div>
+									</div>
+									<?php
+									if($pesan == 'besar'){
+										echo '<div class="alert alert-danger" role="alert">Foto yang anda memiliki kapasitas terlalu besar</div>';
+									}
+									else if($pesan == 'eks'){
+										echo '<div class="alert alert-danger" role="alert">Format foto yang anda masukkan tidak sesuai  </div>';
+									}
+									?>
+									<div class="col-sm-offset-7">
+										<button type="submit" name="upload" value="Upload" class="btn btn-success btn-flat btn-pri btn-md"><i class="fa fa-check" aria-hidden="true"></i> Simpan</button>
+									</div>
+								</form> 
+							</div>
 						</div>
 					</div>
 				</div>
@@ -238,6 +386,129 @@ SmartPhone Compatible web template, free WebDesigns for Nokia, Samsung, LG, Sony
     <!--//footer-->
 	</div>
 		
+	<!-- new added graphs chart js-->
+	
+    <script src="js/Chart.bundle.js"></script>
+    <script src="js/utils.js"></script>
+	
+	<script>
+        var MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        var color = Chart.helpers.color;
+        var barChartData = {
+            labels: ["January", "February", "March", "April", "May", "June", "July"],
+            datasets: [{
+                label: 'Dataset 1',
+                backgroundColor: color(window.chartColors.red).alpha(0.5).rgbString(),
+                borderColor: window.chartColors.red,
+                borderWidth: 1,
+                data: [
+                    randomScalingFactor(),
+                    randomScalingFactor(),
+                    randomScalingFactor(),
+                    randomScalingFactor(),
+                    randomScalingFactor(),
+                    randomScalingFactor(),
+                    randomScalingFactor()
+                ]
+            }, {
+                label: 'Dataset 2',
+                backgroundColor: color(window.chartColors.blue).alpha(0.5).rgbString(),
+                borderColor: window.chartColors.blue,
+                borderWidth: 1,
+                data: [
+                    randomScalingFactor(),
+                    randomScalingFactor(),
+                    randomScalingFactor(),
+                    randomScalingFactor(),
+                    randomScalingFactor(),
+                    randomScalingFactor(),
+                    randomScalingFactor()
+                ]
+            }]
+
+        };
+
+        window.onload = function() {
+            var ctx = document.getElementById("canvas").getContext("2d");
+            window.myBar = new Chart(ctx, {
+                type: 'bar',
+                data: barChartData,
+                options: {
+                    responsive: true,
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Chart.js Bar Chart'
+                    }
+                }
+            });
+
+        };
+
+        document.getElementById('randomizeData').addEventListener('click', function() {
+            var zero = Math.random() < 0.2 ? true : false;
+            barChartData.datasets.forEach(function(dataset) {
+                dataset.data = dataset.data.map(function() {
+                    return zero ? 0.0 : randomScalingFactor();
+                });
+
+            });
+            window.myBar.update();
+        });
+
+        var colorNames = Object.keys(window.chartColors);
+        document.getElementById('addDataset').addEventListener('click', function() {
+            var colorName = colorNames[barChartData.datasets.length % colorNames.length];;
+            var dsColor = window.chartColors[colorName];
+            var newDataset = {
+                label: 'Dataset ' + barChartData.datasets.length,
+                backgroundColor: color(dsColor).alpha(0.5).rgbString(),
+                borderColor: dsColor,
+                borderWidth: 1,
+                data: []
+            };
+
+            for (var index = 0; index < barChartData.labels.length; ++index) {
+                newDataset.data.push(randomScalingFactor());
+            }
+
+            barChartData.datasets.push(newDataset);
+            window.myBar.update();
+        });
+
+        document.getElementById('addData').addEventListener('click', function() {
+            if (barChartData.datasets.length > 0) {
+                var month = MONTHS[barChartData.labels.length % MONTHS.length];
+                barChartData.labels.push(month);
+
+                for (var index = 0; index < barChartData.datasets.length; ++index) {
+                    //window.myBar.addData(randomScalingFactor(), index);
+                    barChartData.datasets[index].data.push(randomScalingFactor());
+                }
+
+                window.myBar.update();
+            }
+        });
+
+        document.getElementById('removeDataset').addEventListener('click', function() {
+            barChartData.datasets.splice(0, 1);
+            window.myBar.update();
+        });
+
+        document.getElementById('removeData').addEventListener('click', function() {
+            barChartData.labels.splice(-1, 1); // remove the label first
+
+            barChartData.datasets.forEach(function(dataset, datasetIndex) {
+                dataset.data.pop();
+            });
+
+            window.myBar.update();
+        });
+    </script>
+	<!-- new added graphs chart js-->
+	
 	<!-- Classie --><!-- for toggle left push menu script -->
 		<script src="js/classie.js"></script>
 		<script>
@@ -261,39 +532,6 @@ SmartPhone Compatible web template, free WebDesigns for Nokia, Samsung, LG, Sony
 		</script>
 	<!-- //Classie --><!-- //for toggle left push menu script -->
 	
-	<!-- calendar -->
-	<script type="text/javascript" src="js/monthly.js"></script>
-	<script type="text/javascript">
-		$(window).load( function() {
-
-			$('#mycalendar').monthly({
-				mode: 'event',
-				
-			});
-
-			$('#mycalendar2').monthly({
-				mode: 'picker',
-				target: '#mytarget',
-				setWidth: '250px',
-				startHidden: true,
-				showTrigger: '#mytarget',
-				stylePast: true,
-				disablePast: true
-			});
-
-		switch(window.location.protocol) {
-		case 'http:':
-		case 'https:':
-		// running on a server, should be good.
-		break;
-		case 'file:':
-		alert('Just a heads-up, events will not work when run locally.');
-		}
-
-		});
-	</script>
-	<!-- //calendar -->
-		
 	<!--scrolling js-->
 	<script src="js/jquery.nicescroll.js"></script>
 	<script src="js/scripts.js"></script>
